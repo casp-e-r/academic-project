@@ -1,0 +1,88 @@
+# Data imports
+import re
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# # ML imports
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import Dense, Dropout, LSTM, GRU, Embedding
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+import csv
+
+#upload file
+from google.colab import files
+uploaded = files.upload()
+
+months=['January','February','March','April','May','June','July','August','October','November','December']
+data={}
+with open('livedataset.csv',encoding='utf-8')as csvfile:
+    reader=csv.reader(csvfile, delimiter='\t')
+    for row in reader:
+      a=row[0]
+      b=a.split(' ')
+      news=row[1]
+      key=b[2]+'-'+con(str(months.index(b[0])+1))+'-'+b[1]
+      key=key[0:len(key)-1]
+      value=news
+      if(key in data):
+        data[key]=data[key]+'-'+value
+      else:
+        data[key]=value
+
+# this function make single digit month date to double digit. for eg: may is 5, which is single digit which is converted to 05
+def con(date):
+    if len(date) < 2:
+        date = '0'+ date
+        return date
+    else:
+        return date
+
+date = []
+for keys in data:
+    date.append(keys)
+
+#creates finalDataset file which contains date and all news data in that date
+import csv
+with open('finalDataset.csv', 'w') as f:
+    writer = csv.writer(f, delimiter='\t')
+    for keys in data:
+        writer.writerow([keys, data[keys]])
+
+#get date and sentiment to arrays
+hdfc_D = []
+hdfc_S = []
+with open('adni-s.csv') as f:
+    reader = csv.reader(f, delimiter='\t')
+    for row in reader:
+        hdfc_D.append(row[0])
+        hdfc_S.append(row[1])
+
+
+#get date and news to the arrays
+news_D= []
+news = []
+with open('finalDataset.csv') as f:
+    reader = csv.reader(f, delimiter='\t')
+    for row in reader:
+        news_D.append(row[0])
+        news.append(row[1])
+
+#compare news dates with hdfc date and store common date news as key and news of that date as values
+dats = {}
+for n in news_D:
+    if n in hdfc_D:
+        i = news_D.index(n)
+        key = news[i]
+        i = hdfc_D.index(n)
+        sentiment = hdfc_S[i]
+        dats[key] = sentiment
+
+#create a file with news as first content and sentiment as second
+with open('NewsAndSentimentadni.csv', 'w') as f:
+        writer = csv.writer(f, delimiter='\t')
+        for keys in dats:
+            writer.writerow([keys, dats[keys]])

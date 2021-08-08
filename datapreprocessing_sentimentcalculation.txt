@@ -1,0 +1,23 @@
+#importig stock file to caluculate datewise sentiment.reversing the order to match news data
+
+
+import csv
+sentiment=0
+s = []
+d = []
+with open('TCS.BO.csv') as csvDataFile:
+    csvReader = csv.reader(csvDataFile)
+    for row in csvReader:
+        a=row[1]
+        b=row[4]
+        if (a>b):
+          sentiment=-1
+        else:  
+          sentiment=1
+        d.append(row[0])
+        s.append(sentiment)
+       
+with open('tcs-s.csv', 'w') as csv_file:
+  writer = csv.writer(csv_file, delimiter= '\t')
+  for i in range(len(s)):
+    writer.writerow([d[-i], s[-i]])

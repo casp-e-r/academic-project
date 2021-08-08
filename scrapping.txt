@@ -1,0 +1,51 @@
+#scrapping stock news from moneycontrol.com
+
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+headings = []
+
+dates = []
+
+URL = 'https://www.moneycontrol.com/news/business/stocks/'
+page_nav = 'page-'
+
+
+        
+
+
+def parser(URL):
+    page = requests.get(URL)
+    soup = BeautifulSoup(page.content, 'html.parser')
+
+    results = soup.find(id = 'left')
+
+    new_elements = results.find('ul')
+    
+    for e in new_elements:
+        line_elem = e.find('h2')
+        d = e.find('span')
+        try:
+            h = line_elem.find('a')['title']
+            headings.append(h)
+            dates.append(d.text)
+        except:
+            continue
+
+
+print('parsingg')
+parser(URL)
+for i in range(2,6278):
+    parser(URL+page_nav+str(i)+'/')
+print('finished')
+
+
+
+with open('dataset.csv', mode='w', encoding='utf8', newline="") as csvfile:
+    writer = csv.writer(csvfile, delimiter='\t')
+    for i in range(0,len(headings)):
+        writer.writerow([str(dates[i]), str(headings[i])])
+
+
+
